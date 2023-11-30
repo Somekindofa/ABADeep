@@ -6,7 +6,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 from dataclasses import dataclass
-from face_detection import RetinaFace
+from retinaface.model import retinaface_model
+from retinaface import RetinaFace
 
 from .utils import prep_input_numpy, getArch
 from .results import GazeResultContainer
@@ -35,15 +36,10 @@ class Pipeline:
         self.model.to(self.device)
         self.model.eval()
 
-        # Create RetinaFace if requested
-        if self.include_detector:
-
-            if device.type == 'cpu':
-                self.detector = RetinaFace()
-            else:
-                self.detector = RetinaFace(gpu_id=device.index)
-
-            self.softmax = nn.Softmax(dim=1)
+        # Create retinaface if requested
+        if self.include_detector: # True by default
+            self.detector   = RetinaFace.build_model()
+            self.softmax    = nn.Softmax(dim=1)
             self.idx_tensor = [idx for idx in range(90)]
             self.idx_tensor = torch.FloatTensor(self.idx_tensor).to(self.device)
 
@@ -56,9 +52,9 @@ class Pipeline:
         scores = []
 
         if self.include_detector:
-            faces = self.detector(frame)
+            faces = self.detector.extract_faces(img_path ="C:\\Users\\The Beast\\OneDrive\\ENSEA\\Projet\\ABADeep\\images\\two kids.jpg" , threshold = 0.5, model = self.model, align = True, allow_upscaling = True)
 
-            if faces is not None: 
+            if faces is not None:
                 for box, landmark, score in faces:
 
                     # Apply threshold

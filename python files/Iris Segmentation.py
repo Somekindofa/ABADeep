@@ -41,7 +41,7 @@ with mp_face_mesh.FaceMesh(
 
         cv.imshow('img', frame)
         key = cv.waitKey(1)
-        if key ==ord('q'):
+        if key == ord('q'):
             break
 cap.release()
 cv.destroyAllWindows()

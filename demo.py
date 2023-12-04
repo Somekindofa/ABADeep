@@ -18,7 +18,8 @@ from retinaface import RetinaFace
 
 from l2cs import select_device, draw_gaze, getArch, Pipeline, render
 
-CWD = pathlib.Path.cwd()
+CWD = pathlib.Path.cwd() # Current working directory
+print(CWD)
 
 def parse_args():
     """Parse input arguments."""
@@ -31,7 +32,7 @@ def parse_args():
         '--snapshot',dest='snapshot', help='Path of model snapshot.', 
         default="C:\\Users\\The Beast\\OneDrive\\ENSEA\\Projet\\ABADeep\\Github Repos\\L2CS-Net\\models\\L2CSNet_gaze360.pkl", type=str)
     parser.add_argument(
-        '--cam',dest='cam_id', help='Camera device id to use [0]',  
+        '--cam',dest='cam_id', help='Camera device id to use [0]',
         default=0, type=int)
     parser.add_argument(
         '--arch',dest='arch',help='Network architecture, can be: ResNet18, ResNet34, ResNet50, ResNet101, ResNet152',
@@ -49,7 +50,7 @@ if __name__ == '__main__':
     # snapshot_path = args.snapshot
 
     gaze_pipeline = Pipeline(
-        weights=CWD / 'models' / 'L2CSNet_gaze360.pkl',
+        weights=CWD / 'Github Repos' / 'L2CS-Net' / 'models' / 'L2CSNet_gaze360.pkl',
         arch='ResNet50',
         device = select_device(args.device, batch_size=1)
     )

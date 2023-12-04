@@ -9,8 +9,8 @@ from dataclasses import dataclass
 from retinaface.model import retinaface_model
 from retinaface import RetinaFace
 
-from .utils import prep_input_numpy, getArch
 from .results import GazeResultContainer
+# from .utils import prep_input_numpy, getArch
 
 
 class Pipeline:
@@ -31,7 +31,7 @@ class Pipeline:
         self.confidence_threshold = confidence_threshold
 
         # Create L2CS model
-        self.model = getArch(arch, 90)
+        self.model = retinaface_model(arch)
         self.model.load_state_dict(torch.load(self.weights, map_location=device))
         self.model.to(self.device)
         self.model.eval()
@@ -52,7 +52,7 @@ class Pipeline:
         scores = []
 
         if self.include_detector:
-            faces = self.detector.extract_faces(img_path ="C:\\Users\\The Beast\\OneDrive\\ENSEA\\Projet\\ABADeep\\images\\two kids.jpg" , threshold = 0.5, model = self.model, align = True, allow_upscaling = True)
+            faces = self.detector.detect_faces(img_path ="C:\\Users\\The Beast\\OneDrive\\ENSEA\\Projet\\ABADeep\\images\\two kids.jpg" , threshold = 0.9, model = self.model, allow_upscaling = True)
 
             if faces is not None:
                 for box, landmark, score in faces:
@@ -104,26 +104,27 @@ class Pipeline:
 
         return results
 
+        # BEGIN: ed8c6549bwf9
+        # END: ed8c6549bwf9
     def predict_gaze(self, frame: Union[np.ndarray, torch.Tensor]):
-        
         # Prepare input
         if isinstance(frame, np.ndarray):
-            img = prep_input_numpy(frame, self.device)
+            img = torch.from_numpy(frame).unsqueeze(0).permute(0, 3, 1, 2).float().to(self.device)
         elif isinstance(frame, torch.Tensor):
             img = frame
         else:
             raise RuntimeError("Invalid dtype for input")
-    
+
         # Predict 
         gaze_pitch, gaze_yaw = self.model(img)
         pitch_predicted = self.softmax(gaze_pitch)
         yaw_predicted = self.softmax(gaze_yaw)
-        
+
         # Get continuous predictions in degrees.
         pitch_predicted = torch.sum(pitch_predicted.data * self.idx_tensor, dim=1) * 4 - 180
         yaw_predicted = torch.sum(yaw_predicted.data * self.idx_tensor, dim=1) * 4 - 180
-        
-        pitch_predicted= pitch_predicted.cpu().detach().numpy()* np.pi/180.0
-        yaw_predicted= yaw_predicted.cpu().detach().numpy()* np.pi/180.0
+
+        pitch_predicted = pitch_predicted.cpu().detach().numpy() * np.pi / 180.0
+        yaw_predicted = yaw_predicted.cpu().detach().numpy() * np.pi / 180.0
 
         return pitch_predicted, yaw_predicted

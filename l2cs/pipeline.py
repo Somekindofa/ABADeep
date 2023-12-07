@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from retinaface.model import retinaface_model
 from retinaface import RetinaFace
 
-from .results import GazeResultContainer
+from l2cs.results import GazeResultContainer
 # from .utils import prep_input_numpy, getArch
 
 
@@ -19,7 +19,7 @@ class Pipeline:
         self, 
         weights: pathlib.Path, 
         arch: str,
-        device: str = 'cpu', 
+        device: str = 'gpu', 
         include_detector:bool = True,
         confidence_threshold:float = 0.5
         ):
@@ -31,7 +31,7 @@ class Pipeline:
         self.confidence_threshold = confidence_threshold
 
         # Create L2CS model
-        self.model = retinaface_model(arch)
+        self.model = retinaface_model.load_weights(arch)
         self.model.load_state_dict(torch.load(self.weights, map_location=device))
         self.model.to(self.device)
         self.model.eval()

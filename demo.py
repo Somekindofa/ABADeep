@@ -16,7 +16,7 @@ from PIL import Image, ImageOps
 
 from retinaface import RetinaFace
 
-from l2cs import select_device, draw_gaze, getArch, Pipeline, render
+from l2cs import select_device, Pipeline, render
 
 CWD = pathlib.Path.cwd() # Current working directory
 print(CWD)
